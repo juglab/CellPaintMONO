@@ -1,0 +1,13 @@
+LICENSE
+README.md
+setup.py
+cellpaintmono/__init__.py
+cellpaintmono/comparison.py
+cellpaintmono/io.py
+cellpaintmono/plotting.py
+cellpaintmono.egg-info/PKG-INFO
+cellpaintmono.egg-info/SOURCES.txt
+cellpaintmono.egg-info/dependency_links.txt
+cellpaintmono.egg-info/requires.txt
+cellpaintmono.egg-info/top_level.txt
+tests/__init__.py
