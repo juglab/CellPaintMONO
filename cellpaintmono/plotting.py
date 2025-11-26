@@ -12,106 +12,91 @@ from matplotlib.axes import Axes
 
 
 def plot_pe_heatmap(
-    pe_matrix: np.ndarray,
-    feature_names: list,
-    sample_names: list,
-    title: str = "Percentage Error Heatmap",
-    annotate: bool = False,
-    figsize: Optional[Tuple[float, float]] = None,
-    cmap: str = "RdBu_r",
-    vmin: Optional[float] = None,
-    vmax: Optional[float] = None,
-) -> Tuple[Figure, Axes]:
+    pe_matrix,
+    features,
+    samples,
+    title="Percentage Error Heatmap",
+    fixed_vmin=-100,
+    fixed_vmax=100,
+):
     """
-    Plot PE heatmap with optional annotations.
+    Plot percentage error heatmap with fixed color scale and outlier detection.
 
-    Color scale: Uses 95th percentile of absolute PE values if vmin/vmax not provided
-    Colormap: RdBu_r (blue=underprediction, white=accurate, red=overprediction)
+    Parameters
+    ----------
+    pe_matrix : np.ndarray
+        Percentage error matrix (features × samples)
+    features : list
+        Feature names (row labels)
+    samples : list
+        Sample IDs (column labels)
+    title : str
+        Plot title
+    fixed_vmin, fixed_vmax : float
+        Fixed color scale limits (default: -100 to +100%)
 
-    annotate: If True, show PE values in each cell
+    Returns
+    -------
+    fig, ax : matplotlib figure and axes
     """
-    n_features = len(feature_names)
-    n_samples = len(sample_names)
+    fig_height = max(20, len(features) * 0.15)
+    fig_width = max(12, len(samples) * 0.6)
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
 
-    # Auto-calculate color scale if not provided
-    if vmin is None or vmax is None:
-        pe_valid = pe_matrix[~np.isnan(pe_matrix)]
-        abs_pe_95 = np.nanpercentile(np.abs(pe_valid), 95)
-        vmin = -abs_pe_95
-        vmax = abs_pe_95
-
-    # Auto-calculate figure size if not provided
-    if figsize is None:
-        fig_width = max(15, n_samples * 0.8)
-        fig_height = max(25, n_features * 0.5)
-        figsize = (fig_width, fig_height)
-
-    # Create figure
-    fig, ax = plt.subplots(figsize=figsize)
-
-    # Plot heatmap
     im = ax.imshow(
         pe_matrix,
         aspect="auto",
-        cmap=cmap,
-        vmin=vmin,
-        vmax=vmax,
+        cmap="RdBu_r",
+        vmin=fixed_vmin,
+        vmax=fixed_vmax,
         interpolation="nearest",
     )
 
-    # Colorbar
-    cbar = plt.colorbar(im, ax=ax, fraction=0.025, pad=0.02)
-    cbar.set_label("Percentage Error (%)", fontsize=13, fontweight="bold")
+    cbar = plt.colorbar(im, ax=ax, pad=0.01)
+    cbar.set_label("Percentage Error (%)", fontsize=12, fontweight="bold")
     cbar.ax.tick_params(labelsize=10)
 
-    # Annotations
-    if annotate:
-        for i in range(n_features):
-            for j in range(n_samples):
-                value = pe_matrix[i, j]
-                if not np.isnan(value):
-                    # White text for extreme values, black for moderate
-                    text_color = "white" if abs(value) > abs(vmax) * 0.6 else "black"
-                    ax.text(
-                        j,
-                        i,
-                        f"{value:.1f}",
-                        ha="center",
-                        va="center",
-                        fontsize=6,
-                        color=text_color,
-                        fontweight="bold",
-                    )
+    ax.set_xticks(np.arange(len(samples)))
+    ax.set_xticklabels(samples, fontsize=10, rotation=90, ha="right")
+    ax.set_yticks(np.arange(len(features)))
+    ax.set_yticklabels(features, fontsize=6)
 
-    # X-axis (samples)
-    ax.set_xlim(-0.5, n_samples - 0.5)
-    ax.set_xticks(range(n_samples))
-    ax.set_xticklabels(sample_names, rotation=90, ha="right", fontsize=10)
-    ax.set_xlabel("Sample", fontsize=14, fontweight="bold")
+    ax.set_xticks(np.arange(len(samples)) - 0.5, minor=True)
+    ax.set_yticks(np.arange(len(features)) - 0.5, minor=True)
+    ax.grid(which="minor", color="gray", linestyle="-", linewidth=0.3, alpha=0.3)
 
-    # Y-axis (features)
-    ax.set_ylim(-0.5, n_features - 0.5)
-    ax.set_yticks(range(n_features))
-    ax.set_yticklabels(feature_names, fontsize=7)
-    ax.set_ylabel("Feature", fontsize=14, fontweight="bold")
-
-    # Title
-    ax.set_title(title, fontsize=14, fontweight="bold", pad=15)
-
-    # Grid
-    ax.set_xticks(np.arange(n_samples + 1) - 0.5, minor=True)
-    ax.set_yticks(np.arange(n_features + 1) - 0.5, minor=True)
-
-    if annotate:
-        # Thick black grid for annotated plots
-        ax.grid(which="minor", color="black", linestyle="-", linewidth=1.0)
-    else:
-        # Subtle white grid for non-annotated plots
-        ax.grid(which="minor", color="white", linestyle="-", linewidth=0.5)
-
-    ax.tick_params(which="minor", size=0)
+    ax.set_xlabel("Sample", fontsize=13, fontweight="bold")
+    ax.set_ylabel("Feature", fontsize=13, fontweight="bold")
+    ax.set_title(
+        f"{title}\n(Color scale: {fixed_vmin}% to {fixed_vmax}%)",
+        fontsize=14,
+        fontweight="bold",
+        pad=15,
+    )
 
     plt.tight_layout()
+
+    outlier_threshold = max(abs(fixed_vmin), abs(fixed_vmax))
+    outliers = []
+
+    for i, feature in enumerate(features):
+        for j, sample in enumerate(samples):
+            value = pe_matrix[i, j]
+            if not np.isnan(value) and abs(value) > outlier_threshold:
+                outliers.append({"feature": feature, "sample": sample, "PE": value})
+
+    if outliers:
+        outliers_sorted = sorted(outliers, key=lambda x: abs(x["PE"]), reverse=True)
+        pe_values = [o["PE"] for o in outliers_sorted]
+        print(f"OUTLIERS: {len(outliers)} values with |PE| > {outlier_threshold}%")
+        print(f"{'Feature':<50} {'Sample':<15} {'PE (%)':<10}")
+        for outlier in outliers_sorted:
+            print(
+                f"{outlier['feature']:<50} {outlier['sample']:<15} {outlier['PE']:>9.2f}"
+            )
+        print(f"\nOutliers > 100%:  {max(pe_values):>8.2f}%")
+        print(f"Outliers < -100%: {min(pe_values):>8.2f}%")
+        print(f"Mean |PE| (outliers):    {np.mean(np.abs(pe_values)):>8.2f}%")
 
     return fig, ax
 
