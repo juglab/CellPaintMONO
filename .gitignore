@@ -4,61 +4,45 @@ __pycache__/
 *$py.class
 *.so
 .Python
-
-# Virtual environments
-.venv/
-venv/
-ENV/
-env/
-
-# uv
-.python-version
-uv.lock
-
-# Distribution / packaging
-dist/
 build/
-*.egg-info/
+develop-eggs/
+dist/
+downloads/
+eggs/
 .eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
 # Testing
 .pytest_cache/
 .coverage
 htmlcov/
 .tox/
-.hypothesis/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-*/.ipynb_checkpoints/*
 
 # IDEs
 .vscode/
 .idea/
 *.swp
 *.swo
-*~
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Environment variables
+# Environment
 .env
-.env.local
+.venv
+venv/
 
-# Data (uncomment if you don't want to track data files)
-# data/
-# *.csv
-# *.xlsx
-# *.parquet
-
-# Logs
-*.log
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-notebooks/all_files_exploration.ipynb
-notebooks/all_files_exploration.ipynb
+# Data (customize for your needs)
+data/
+*.csv
+*.h5
+*.hdf5
