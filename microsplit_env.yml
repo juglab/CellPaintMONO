@@ -1,0 +1,17 @@
+name: microsplit
+channels:
+  - conda-forge
+  - pytorch
+  - defaults
+dependencies:
+  - python=3.10
+  - pytorch::pytorch
+  - pytorch::torchvision
+  - pip
+  - pip:
+    - numpy<2.0.0
+    - pyyaml
+    - tifffile
+    - pandas
+    - matplotlib
+    - git+https://github.com/diyasrivas/JUMP-MicroSplit.git
