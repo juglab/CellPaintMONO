@@ -1,0 +1,10 @@
+# Template: copy for each experiment and fill in the paths.
+# All options are documented in cellpaintmono/fidelity/config.py.
+reference_dir: /path/to/original/cellprofiler_output
+test_dir: /path/to/predicted/cellprofiler_output
+output_dir: /path/to/output
+reference_label: original
+test_label: MicroSplit
+channels: [DNA, ER, RNA, AGP, Mito]
+# Image id (<plate>_<well>_<site>) of the worked example; first image if omitted.
+# worked_example_image: <plate>_<well>_<site>

@@ -16,6 +16,7 @@ dependencies = [
     "tifffile>=2020.0.0",
     "pyyaml>=5.0",
     "tqdm>=4.60",
+    "pot>=0.9.7.post1",
 ]
 
 [dependency-groups]
